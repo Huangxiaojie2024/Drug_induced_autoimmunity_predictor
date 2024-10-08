@@ -98,13 +98,13 @@ if st.button("Predict"):
                                                data=descriptors_std[0][:top_n], 
                                                feature_names=descriptor_names_top)
 
-            # ** 尝试生成 SHAP Waterfall 图 **
-            st.subheader("SHAP Explanation (Waterfall Plot)")
+            # ** 使用 SHAP force_plot 替代 waterfall_plot **
+            st.subheader("SHAP Explanation (Force Plot)")
 
-            # 使用matplotlib设置图像大小以避免超出显示限制
-            plt.figure(figsize=(8, 6))  # 设定合适的图像大小
+            # 生成 force plot
             shap.initjs()  # 初始化SHAP的js可视化
-            st.pyplot(shap.waterfall_plot(shap_explanation))  # 显示Class 1的SHAP瀑布图
+            st.components.v1.html(shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0]), 
+                                  height=600)
 
             # 在SHAP图中显示原始特征值
             st.subheader("SHAP Explanation with Original Feature Values")
