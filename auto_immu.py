@@ -85,8 +85,14 @@ if st.button("Predict"):
             # 计算SHAP值
             shap_values = explainer.shap_values(descriptors_std)
 
-            # 保存 SHAP 力图为 HTML 文件
-            force_plot = shap.force_plot(explainer.expected_value[1], shap_values[0,:,1], descriptors_std[0], show=False)
+            # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
+            force_plot = shap.force_plot(
+                explainer.expected_value[1], 
+                shap_values[0,:,1],  # 使用第二个类别的 SHAP 值
+                descriptors,  # 使用原始描述符
+                feature_names=descriptor_names,  # 显示特征名称
+                show=False
+            )
             html_file = "shap_force_plot.html"
             shap.save_html(html_file, force_plot)
 
