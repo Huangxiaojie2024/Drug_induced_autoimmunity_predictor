@@ -36,7 +36,7 @@ def get_descriptors(smiles):
     return np.array(descriptors)
 
 # Streamlit app
-st.title("Drug-induced Autoimmune Disease Prediction")
+st.title("Drug-induced Autoimmune (DIA) Prediction")
 
 # 输入 SMILES 结构
 smiles_input = st.text_input("Enter a drug SMILES structure")
