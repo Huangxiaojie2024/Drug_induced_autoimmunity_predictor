@@ -9,7 +9,6 @@ import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Drug-induced Autoimmune Prediction", layout="wide")
 
-
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
     scaler, best_estimator_eec = pickle.load(f)
@@ -74,19 +73,18 @@ if st.button("Predict"):
             st.write(prob_df)
 
             # 最终预测结果
-           if prediction_prob[1] > prediction_prob[0]:
-           st.markdown(
-        f"<h3 style='font-size: 24px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
-        f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>",
-        unsafe_allow_html=True
-         )
-          else:
-    st.markdown(
-        f"<h3 style='font-size: 24px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
-        f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>",
-        unsafe_allow_html=True
-    )
-
+            if prediction_prob[1] > prediction_prob[0]:
+                st.markdown(
+                    f"<h3 style='font-size: 24px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
+                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>",
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(
+                    f"<h3 style='font-size: 24px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
+                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>",
+                    unsafe_allow_html=True
+                )
 
             # SHAP 解释
             st.subheader("SHAP Explanation")
