@@ -94,10 +94,10 @@ if st.button("Predict"):
             # 创建瀑布图
             shap_values_array = np.array(shap_values[0,:,1]).flatten()  # 选择类1的 SHAP 值
             shap.waterfall_plot(
-                explainer.expected_value[1],
-                shap_values_array,
-                feature_names=descriptor_names
-            )
+                shap.Explanation(values=shap_values_array, 
+                     base_values=explainer.expected_value[1], 
+                     data=feature_values,  # 使用 data 参数传递特征值
+                     feature_names=descriptor_names)
 
             # 在 Streamlit 中显示瀑布图
             st.pyplot()
