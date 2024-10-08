@@ -95,9 +95,10 @@ if st.button("Predict"):
 
             # SHAP 解释
             st.subheader("SHAP Explanation")
-
+            
             # 创建SHAP解释器
-            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
+            background_data = shap.sample(Xtrain_std, 100)  # 只选择100个样本
+            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, background_data)
 
             # 计算SHAP值
             shap_values = explainer.shap_values(descriptors_std)
