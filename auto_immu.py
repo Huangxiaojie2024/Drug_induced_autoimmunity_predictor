@@ -76,48 +76,18 @@ if st.button("Predict"):
             else:
                 st.success("The drug is predicted NOT to be associated with autoimmune disease.")
 
-            # ------------------------------
             # SHAP 解释
-            # 使用SHAP的KernelExplainer进行解释
-            # 使用模型的标准化训练数据作为背景数据
-            background_data = scaler.transform([descriptors])  # 使用标准化后的数据
-            explainer = shap.KernelExplainer(
-                best_estimator_eec.predict_proba, background_data)  # 使用模型的概率预测函数
-            
-            # 解释当前药物的预测
-            shap_values = explainer.shap_values(descriptors_std[0])  # 获取SHAP值
+            st.subheader("SHAP Explanation")
 
-            # ** 限制显示前10个重要特征 **
-            top_n = 10  # 只显示前10个重要特征
-            shap_values_top = shap_values[1][:top_n]  # 选择类1的前top_n个贡献
-            descriptor_names_top = descriptor_names[:top_n]  # 选择前top_n个特征名称
+            # 创建SHAP解释器
+            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, scaler.inverse_transform(descriptors_std))
 
-            # 将 SHAP 值转化为 SHAP Explanation 对象
-            shap_explanation = shap.Explanation(values=shap_values_top, 
-                                               base_values=explainer.expected_value[1], 
-                                               data=descriptors_std[0][:top_n], 
-                                               feature_names=descriptor_names_top)
+            # 计算SHAP值
+            shap_values = explainer.shap_values(descriptors_std)
 
-            # ** 使用 SHAP force_plot 替代 waterfall_plot **
-            st.subheader("SHAP Explanation (Force Plot)")
-
-            # 生成 force plot
-            shap.initjs()  # 初始化SHAP的js可视化
-            st.components.v1.html(shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0]), 
-                                  height=600)
-
-            # 在SHAP图中显示原始特征值
-            st.subheader("SHAP Explanation with Original Feature Values")
-
-            # 创建一个DataFrame以显示每个特征的原始值和贡献
-            shap_explanation_df = pd.DataFrame({
-                'Feature': descriptor_names_top,
-                'Original Value': descriptors[:top_n],  # 原始特征值
-                'SHAP Value': shap_values_top  # SHAP贡献值
-            })
-
-            # 显示带有原始值和SHAP贡献的解释
-            st.write(shap_explanation_df)
-
+            # 绘制SHAP力图
+            fig, ax = plt.subplots()
+            shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0], ax=ax, matplotlib=True)
+            st.pyplot(fig)
     else:
         st.error("Please enter a valid SMILES structure.")
