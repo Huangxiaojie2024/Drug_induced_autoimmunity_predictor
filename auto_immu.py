@@ -7,7 +7,7 @@ import pandas as pd
 import shap
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Drug-induced Autoimmune Prediction", layout="wide")
+st.set_page_config(page_title="Drug-induced Autoimmune Disease Prediction", layout="wide")
 
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
@@ -75,14 +75,18 @@ if st.button("Predict"):
             # 最终预测结果
             if prediction_prob[1] > prediction_prob[0]:
                 st.markdown(
+                    f"<div style='border: 2px solid green; padding: 10px; border-radius: 5px;'>"
                     f"<h3 style='font-size: 24px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
-                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>",
+                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>"
+                    f"</div>",
                     unsafe_allow_html=True
                 )
             else:
                 st.markdown(
+                    f"<div style='border: 2px solid green; padding: 10px; border-radius: 5px;'>"
                     f"<h3 style='font-size: 24px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
-                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>",
+                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>"
+                    f"</div>",
                     unsafe_allow_html=True
                 )
 
@@ -98,7 +102,7 @@ if st.button("Predict"):
             # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
             force_plot = shap.force_plot(
                 explainer.expected_value[1], 
-                shap_values[0,:,1],  # 使用第二个类别的 SHAP 值
+                shap_values[0, :, 1],  # 使用第二个类别的 SHAP 值
                 descriptors,  # 使用原始描述符
                 feature_names=descriptor_names,  # 显示特征名称
                 show=False
