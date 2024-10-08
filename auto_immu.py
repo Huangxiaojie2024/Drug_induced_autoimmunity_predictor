@@ -87,24 +87,20 @@ if st.button("Predict"):
             # 计算SHAP值
             shap_values = explainer.shap_values(descriptors_std)
 
-            # 保存 SHAP 瀑布图为 HTML 文件，显示特征名称和原始数值
+            # 生成瀑布图数据
             st.subheader("SHAP Waterfall Plot")
             shap.initjs()  # 初始化 JavaScript 库
             
-            # 选择第一个样本的 SHAP 值
+            # 创建瀑布图
+            shap_values_array = np.array(shap_values[1]).flatten()  # 选择类1的 SHAP 值
             shap.waterfall_plot(
                 explainer.expected_value[1],
-                shap_values[0][:, 1],  # 使用第二个类别的 SHAP 值
-                feature_names=descriptor_names,
-                title="SHAP Waterfall Plot"
+                shap_values_array,
+                feature_names=descriptor_names
             )
 
-            # 直接在 Streamlit 中显示瀑布图
-            st.pyplot(shap.waterfall_plot(
-                explainer.expected_value[1],
-                shap_values[0][:, 1], 
-                feature_names=descriptor_names
-            ))
+            # 在 Streamlit 中显示瀑布图
+            st.pyplot()
 
     else:
         st.error("Please enter a valid SMILES structure.")
