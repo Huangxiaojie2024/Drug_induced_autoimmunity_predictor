@@ -9,6 +9,7 @@ import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Drug-induced Autoimmune Disease Prediction", layout="wide")
 
+
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
     scaler, best_estimator_eec = pickle.load(f)
@@ -87,20 +88,19 @@ if st.button("Predict"):
             # 计算SHAP值
             shap_values = explainer.shap_values(descriptors_std)
 
-            # 生成瀑布图数据
-            st.subheader("SHAP Waterfall Plot")
-            shap.initjs()  # 初始化 JavaScript 库
-            
-            # 创建瀑布图
-            shap_values_array = np.array(shap_values[0,:,1]).flatten()  # 选择类1的 SHAP 值
-            shap.waterfall_plot(
-                shap.Explanation(values=shap_values_array, 
-                     base_values=explainer.expected_value[1], 
-                     # data=feature_values,  # 使用 data 参数传递特征值
-                     feature_names=descriptor_names))
+            # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
+            force_plot = shap.force_plot(
+                explainer.expected_value[1], 
+                shap_values[0,:,1],  # 使用第二个类别的 SHAP 值
+                descriptors,  # 使用原始描述符
+                feature_names=descriptor_names,  # 显示特征名称
+                show=False
+            )
+            html_file = "shap_force_plot.html"
+            shap.save_html(html_file, force_plot)
 
-            # 在 Streamlit 中显示瀑布图
-            st.pyplot()
-
+            # 在 Streamlit 中显示 HTML
+            with open(html_file) as f:
+                components.html(f.read(), height=500, scrolling=True)
     else:
         st.error("Please enter a valid SMILES structure.")
