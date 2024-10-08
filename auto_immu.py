@@ -97,7 +97,7 @@ if st.button("Predict"):
                 shap.Explanation(values=shap_values_array, 
                      base_values=explainer.expected_value[1], 
                      data=feature_values,  # 使用 data 参数传递特征值
-                     feature_names=descriptor_names)
+                     feature_names=descriptor_names))
 
             # 在 Streamlit 中显示瀑布图
             st.pyplot()
