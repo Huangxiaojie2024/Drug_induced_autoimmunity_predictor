@@ -1,7 +1,6 @@
 import streamlit as st
 from rdkit import Chem
 from rdkit.ML.Descriptors import MoleculeDescriptors
-from rdkit.Chem import Descriptors
 import pickle
 import numpy as np
 import pandas as pd
@@ -45,14 +44,32 @@ if st.button("Predict"):
         if descriptors is None:
             st.error("Invalid SMILES structure")
         else:
+            # 显示原始描述符
+            st.subheader("Original Descriptors (before scaling)")
+            descriptors_df = pd.DataFrame([descriptors], columns=descriptor_names)
+            st.write(descriptors_df)
+
             # 将描述符标准化
             descriptors_std = scaler.transform([descriptors])
 
-            # 使用模型进行预测
-            prediction = best_estimator_eec.predict(descriptors_std)
+            # 显示标准化后的描述符
+            st.subheader("Scaled Descriptors (after scaling)")
+            descriptors_std_df = pd.DataFrame(descriptors_std, columns=descriptor_names)
+            st.write(descriptors_std_df)
 
-            # 显示结果
-            if prediction == 1:
+            # 使用模型进行预测并获取概率值
+            prediction_prob = best_estimator_eec.predict_proba(descriptors_std)[0]
+
+            # 显示预测的概率值
+            st.subheader("Prediction Probabilities")
+            prob_df = pd.DataFrame({
+                "Class 0 (No Autoimmune)": prediction_prob[0],
+                "Class 1 (Autoimmune)": prediction_prob[1]
+            }, index=[0])
+            st.write(prob_df)
+
+            # 最终预测结果
+            if prediction_prob[1] > prediction_prob[0]:
                 st.success("The drug is predicted to be associated with autoimmune disease.")
             else:
                 st.success("The drug is predicted NOT to be associated with autoimmune disease.")
