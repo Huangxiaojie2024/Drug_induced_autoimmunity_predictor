@@ -97,7 +97,7 @@ if st.button("Predict"):
             st.subheader("SHAP Explanation (Waterfall Plot)")
 
             # 使用matplotlib设置图像大小以避免超出显示限制
-            plt.figure(figsize=(12, 6))  # 设定合适的图像大小
+            plt.figure(figsize=(6, 3))  # 设定合适的图像大小
             shap.initjs()  # 初始化SHAP的js可视化
             st.pyplot(shap.waterfall_plot(shap_explanation))  # 显示Class 1的SHAP瀑布图
 
