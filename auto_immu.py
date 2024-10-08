@@ -1,13 +1,11 @@
 import streamlit as st
 from rdkit import Chem
 from rdkit.ML.Descriptors import MoleculeDescriptors
-from rdkit.Chem import Draw
 import pickle
 import numpy as np
 import pandas as pd
 import shap
 import streamlit.components.v1 as components
-from PIL import Image
 
 st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction", layout="wide")
 
@@ -35,7 +33,7 @@ def get_descriptors(smiles):
         return None
     calculator = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
     descriptors = calculator.CalcDescriptors(mol)
-    return np.array(descriptors), mol
+    return np.array(descriptors)
 
 # Streamlit app
 st.title("Drug-induced Autoimmunity (DIA) Prediction")
@@ -45,15 +43,11 @@ smiles_input = st.text_input("Enter a drug SMILES structure")
 
 if st.button("Predict"):
     if smiles_input:
-        descriptors, mol = get_descriptors(smiles_input)
+        descriptors = get_descriptors(smiles_input)
         
         if descriptors is None:
             st.error("Invalid SMILES structure")
         else:
-            # 显示分子结构
-            img = Draw.MolToImage(mol)
-            st.image(img, caption='Chemical Structure', use_column_width=True)
-
             # 显示原始描述符
             st.subheader("Original Descriptors (before scaling)")
             descriptors_df = pd.DataFrame([descriptors], columns=descriptor_names)
