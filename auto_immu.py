@@ -92,10 +92,10 @@ if st.button("Predict"):
             shap.initjs()  # 初始化 JavaScript 库
             
             # 创建瀑布图
-            shap_values_array = np.array(shap_values[1]).flatten()  # 选择类1的 SHAP 值
+            shap_values_array = np.array(shap_values[0,:,1]).flatten()  # 选择类1的 SHAP 值
             shap.waterfall_plot(
                 explainer.expected_value[1],
-                shap_values_array[0,:,1],
+                shap_values_array,
                 feature_names=descriptor_names
             )
 
