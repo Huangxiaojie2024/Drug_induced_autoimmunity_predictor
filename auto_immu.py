@@ -95,7 +95,7 @@ if st.button("Predict"):
             shap_values_array = np.array(shap_values[1]).flatten()  # 选择类1的 SHAP 值
             shap.waterfall_plot(
                 explainer.expected_value[1],
-                shap_values_array,
+                shap_values_array[0,:,1],
                 feature_names=descriptor_names
             )
 
