@@ -4,3 +4,4 @@ rdkit
 numpy
 pandas
 imblearn
+lime
