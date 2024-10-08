@@ -85,7 +85,7 @@ if st.button("Predict"):
             shap_values = explainer.shap_values(descriptors_std)
 
             # 绘制SHAP力图
-            shap_html = shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0], show=False)
+            shap_html = shap.force_plot(explainer.expected_value[1], shap_values[0,:,1], descriptors_std[0], show=False)
             st.components.v1.html(shap_html.html, height=400)
     else:
         st.error("Please enter a valid SMILES structure.")
