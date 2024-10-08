@@ -7,7 +7,7 @@ import pandas as pd
 import shap
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Drug-induced Autoimmune Disease Prediction", layout="wide")
+st.set_page_config(page_title="Drug-induced Autoimmune Prediction", layout="wide")
 
 
 # 加载模型和标准化器
@@ -74,10 +74,19 @@ if st.button("Predict"):
             st.write(prob_df)
 
             # 最终预测结果
-            if prediction_prob[1] > prediction_prob[0]:
-                st.success("The drug is predicted to be associated with autoimmune disease.")
-            else:
-                st.success("The drug is predicted NOT to be associated with autoimmune disease.")
+           if prediction_prob[1] > prediction_prob[0]:
+           st.markdown(
+        f"<h3 style='font-size: 24px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
+        f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>",
+        unsafe_allow_html=True
+         )
+          else:
+    st.markdown(
+        f"<h3 style='font-size: 24px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
+        f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>",
+        unsafe_allow_html=True
+    )
+
 
             # SHAP 解释
             st.subheader("SHAP Explanation")
