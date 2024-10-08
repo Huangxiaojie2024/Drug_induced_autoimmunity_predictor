@@ -87,17 +87,22 @@ if st.button("Predict"):
             # 解释当前药物的预测
             shap_values = explainer.shap_values(descriptors_std[0])  # 获取SHAP值
 
+            # 选择前10个贡献最大的特征（如果特征过多，导致图像过大，可以减少特征数量）
+            top_n = 10
+            shap_values_top = shap_values[1][:top_n]  # 选择类1的前top_n个贡献
+            descriptor_names_top = descriptor_names[:top_n]  # 选择前top_n个特征名称
+
             # 将 SHAP 值转化为 SHAP Explanation 对象
-            shap_explanation = shap.Explanation(values=shap_values[1], 
+            shap_explanation = shap.Explanation(values=shap_values_top, 
                                                base_values=explainer.expected_value[1], 
-                                               data=descriptors_std[0], 
-                                               feature_names=descriptor_names)
+                                               data=descriptors_std[0][:top_n], 
+                                               feature_names=descriptor_names_top)
 
             # SHAP瀑布图显示
             st.subheader("SHAP Explanation (Waterfall Plot)")
 
             # 使用matplotlib设置图像大小以避免超出显示限制
-            plt.figure(figsize=(6, 3))  # 设定合适的图像大小
+            plt.figure(figsize=(8, 6))  # 设定合适的图像大小
             shap.initjs()  # 初始化SHAP的js可视化
             st.pyplot(shap.waterfall_plot(shap_explanation))  # 显示Class 1的SHAP瀑布图
 
@@ -106,9 +111,9 @@ if st.button("Predict"):
 
             # 创建一个DataFrame以显示每个特征的原始值和贡献
             shap_explanation_df = pd.DataFrame({
-                'Feature': descriptor_names,
-                'Original Value': descriptors,  # 原始特征值
-                'SHAP Value': shap_values[1]  # SHAP贡献值
+                'Feature': descriptor_names_top,
+                'Original Value': descriptors[:top_n],  # 原始特征值
+                'SHAP Value': shap_values_top  # SHAP贡献值
             })
 
             # 显示带有原始值和SHAP贡献的解释
