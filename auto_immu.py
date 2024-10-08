@@ -4,7 +4,7 @@ from rdkit.ML.Descriptors import MoleculeDescriptors
 import pickle
 import numpy as np
 import pandas as pd
-from lime.lime_tabular import LimeTabularExplainer
+import shap
 
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
@@ -64,8 +64,8 @@ if st.button("Predict"):
             # 显示预测的概率值
             st.subheader("Prediction Probabilities")
             prob_df = pd.DataFrame({
-                "Class 0 (DIA_negative)": prediction_prob[0],
-                "Class 1 (DIA_positive)": prediction_prob[1]
+                "Class 0 (No Autoimmune)": prediction_prob[0],
+                "Class 1 (Autoimmune)": prediction_prob[1]
             }, index=[0])
             st.write(prob_df)
 
@@ -76,26 +76,32 @@ if st.button("Predict"):
                 st.success("The drug is predicted NOT to be associated with autoimmune disease.")
 
             # ------------------------------
-            # LIME 解释
-            # 创建LIME解释器
-            explainer = LimeTabularExplainer(
-                training_data=scaler.transform([descriptors]),  # 这里传入标准化后的数据
-                feature_names=descriptor_names,
-                class_names=["Class 0 (DIA_negative)", "Class 1 (DIA_positive)"],
-                mode="classification"
-            )
-
+            # SHAP 解释
+            # 使用SHAP的KernelExplainer进行解释
+            # 使用模型的标准化训练数据作为背景数据
+            background_data = scaler.transform([descriptors])  # 使用标准化后的数据
+            explainer = shap.KernelExplainer(
+                best_estimator_eec.predict_proba, background_data)  # 使用模型的概率预测函数
+            
             # 解释当前药物的预测
-            explanation = explainer.explain_instance(
-                data_row=descriptors_std[0],  # 传入标准化后的数据
-                predict_fn=best_estimator_eec.predict_proba,  # 使用模型的概率预测方法
-                num_features=10  # 解释前10个重要特征
-            )
+            shap_values = explainer.shap_values(descriptors_std[0])  # 获取SHAP值
 
-            # 显示LIME解释结果
-            st.subheader("LIME Explanation (Top 10 Important Features)")
-            explanation.show_in_notebook()  # 展示解释结果
-            explanation_html = explanation.as_html()  # 获取HTML形式的解释结果
-            st.components.v1.html(explanation_html, height=600)  # 使用streamlit组件显示解释结果
+            # SHAP瀑布图显示
+            st.subheader("SHAP Explanation (Waterfall Plot)")
+            shap.initjs()  # 初始化SHAP的js可视化
+            st.pyplot(shap.waterfall_plot(shap_values[1]))  # 显示Class 1的SHAP瀑布图
+
+            # 在SHAP图中显示原始特征值
+            st.subheader("SHAP Explanation with Original Feature Values")
+
+            # 创建一个DataFrame以显示每个特征的原始值和贡献
+            shap_explanation = pd.DataFrame({
+                'Feature': descriptor_names,
+                'Original Value': descriptors,  # 原始特征值
+                'SHAP Value': shap_values[1]  # SHAP贡献值
+            })
+
+            # 显示带有原始值和SHAP贡献的解释
+            st.write(shap_explanation)
     else:
         st.error("Please enter a valid SMILES structure.")
