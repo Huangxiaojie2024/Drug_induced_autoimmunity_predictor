@@ -7,7 +7,7 @@ import pandas as pd
 import shap
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Drug-induced Autoimmune (DIA) Prediction", layout="wide")
+st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction", layout="wide")
 
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
@@ -36,7 +36,7 @@ def get_descriptors(smiles):
     return np.array(descriptors)
 
 # Streamlit app
-st.title("Drug-induced Autoimmune (DIA) Prediction")
+st.title("Drug-induced Autoimmunity (DIA) Prediction")
 
 # 输入 SMILES 结构
 smiles_input = st.text_input("Enter a drug SMILES structure")
