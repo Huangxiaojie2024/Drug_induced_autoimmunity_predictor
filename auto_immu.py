@@ -68,17 +68,16 @@ if st.button("Predict"):
             # 显示预测的概率值
             st.subheader("Prediction Probabilities")
             prob_df = pd.DataFrame({
-                "Class 0 (DIA_negative)": prediction_prob[0],
-                "Class 1 (DIA_positive)": prediction_prob[1]
+                "Class 0 (No Autoimmune)": prediction_prob[0],
+                "Class 1 (Autoimmune)": prediction_prob[1]
             }, index=[0])
             st.write(prob_df)
 
-          # 最终预测结果
-          if prediction_prob[1] > prediction_prob[0]:
-           st.success(f"The drug is predicted to be associated with autoimmune disease. **(Probability: {prediction_prob[1]:.2f})**", unsafe_allow_html=True)
-         else:
-           st.success(f"The drug is predicted NOT to be associated with autoimmune disease. **(Probability: {prediction_prob[0]:.2f})**", unsafe_allow_html=True)
-
+            # 最终预测结果
+            if prediction_prob[1] > prediction_prob[0]:
+                st.success("The drug is predicted to be associated with autoimmune disease.")
+            else:
+                st.success("The drug is predicted NOT to be associated with autoimmune disease.")
 
             # SHAP 解释
             st.subheader("SHAP Explanation")
