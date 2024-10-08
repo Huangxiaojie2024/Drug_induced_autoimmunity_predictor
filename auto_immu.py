@@ -12,10 +12,7 @@ st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction", layo
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
     scaler, best_estimator_eec = pickle.load(f)
-# 加载训练数据
-with open('Xtrain_std.pkl', 'rb') as f:
-    Xtrain_std = pickle.load(f)
-    
+
 # 65个分子描述符名称
 descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_VSA4', 'EState_VSA6', 
                     'EState_VSA9', 'HallKierAlpha', 'Ipc', 'Kappa3', 'NHOHCount', 'NumAliphaticHeterocycles',
@@ -95,10 +92,9 @@ if st.button("Predict"):
 
             # SHAP 解释
             st.subheader("SHAP Explanation")
-            
+
             # 创建SHAP解释器
-            background_data = shap.sample(Xtrain_std, 100)  # 只选择100个样本
-            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, background_data)
+            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, scaler.inverse_transform(descriptors_std))
 
             # 计算SHAP值
             shap_values = explainer.shap_values(descriptors_std)
