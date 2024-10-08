@@ -86,7 +86,7 @@ if st.button("Predict"):
             shap_values = explainer.shap_values(descriptors_std)
 
             # 保存 SHAP 力图为 HTML 文件
-            force_plot = shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0], show=False)
+            force_plot = shap.force_plot(explainer.expected_value[1], shap_values[0,:,1], descriptors_std[0], show=False)
             html_file = "shap_force_plot.html"
             shap.save_html(html_file, force_plot)
 
