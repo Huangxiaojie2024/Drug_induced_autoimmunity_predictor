@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import shap
+import streamlit.components.v1 as components
 
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
@@ -84,8 +85,13 @@ if st.button("Predict"):
             # 计算SHAP值
             shap_values = explainer.shap_values(descriptors_std)
 
-            # 绘制SHAP力图
-            shap_html = shap.force_plot(explainer.expected_value[1], shap_values[0,:,1], descriptors_std[0], show=False)
-            st.components.v1.html(shap_html.html, height=400)
+            # 保存 SHAP 力图为 HTML 文件
+            force_plot = shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0], show=False)
+            html_file = "shap_force_plot.html"
+            shap.save_html(html_file, force_plot)
+
+            # 在 Streamlit 中显示 HTML
+            with open(html_file) as f:
+                components.html(f.read(), height=500, scrolling=True)
     else:
         st.error("Please enter a valid SMILES structure.")
