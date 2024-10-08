@@ -87,8 +87,8 @@ if st.button("Predict"):
             # 解释当前药物的预测
             shap_values = explainer.shap_values(descriptors_std[0])  # 获取SHAP值
 
-            # 选择前10个贡献最大的特征（如果特征过多，导致图像过大，可以减少特征数量）
-            top_n = 10
+            # ** 限制显示前10个重要特征 **
+            top_n = 10  # 只显示前10个重要特征
             shap_values_top = shap_values[1][:top_n]  # 选择类1的前top_n个贡献
             descriptor_names_top = descriptor_names[:top_n]  # 选择前top_n个特征名称
 
@@ -98,7 +98,7 @@ if st.button("Predict"):
                                                data=descriptors_std[0][:top_n], 
                                                feature_names=descriptor_names_top)
 
-            # SHAP瀑布图显示
+            # ** 尝试生成 SHAP Waterfall 图 **
             st.subheader("SHAP Explanation (Waterfall Plot)")
 
             # 使用matplotlib设置图像大小以避免超出显示限制
@@ -118,5 +118,6 @@ if st.button("Predict"):
 
             # 显示带有原始值和SHAP贡献的解释
             st.write(shap_explanation_df)
+
     else:
         st.error("Please enter a valid SMILES structure.")
