@@ -87,7 +87,7 @@ if st.button("Predict"):
 
             # 绘制SHAP力图
             fig, ax = plt.subplots()
-            shap.force_plot(explainer.expected_value[1], shap_values[1], descriptors_std[0], ax=ax, matplotlib=True)
+            shap.force_plot(explainer.expected_value[1], shap_values[0,:,1], descriptors_std[0], ax=ax, matplotlib=True)
             st.pyplot(fig)
     else:
         st.error("Please enter a valid SMILES structure.")
