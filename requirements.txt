@@ -4,6 +4,6 @@ rdkit
 numpy
 pandas
 imblearn
-lime
+shap
 IPython
 
