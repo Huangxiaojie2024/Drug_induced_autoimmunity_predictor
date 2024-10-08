@@ -76,7 +76,7 @@ if st.button("Predict"):
             if prediction_prob[1] > prediction_prob[0]:
                 st.markdown(
                     f"<div style='background-color: lightgreen; border: 2px solid green; padding: 10px; border-radius: 5px;'>"
-                    f"<h3 style='font-size: 24px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
+                    f"<h3 style='font-size: 30px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
                     f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>"
                     f"</div>",
                     unsafe_allow_html=True
@@ -84,7 +84,7 @@ if st.button("Predict"):
             else:
                 st.markdown(
                     f"<div style='background-color: lightgreen; border: 2px solid green; padding: 10px; border-radius: 5px;'>"
-                    f"<h3 style='font-size: 24px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
+                    f"<h3 style='font-size: 30px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
                     f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>"
                     f"</div>",
                     unsafe_allow_html=True
