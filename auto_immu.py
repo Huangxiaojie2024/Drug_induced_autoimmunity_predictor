@@ -7,7 +7,6 @@ import pandas as pd
 import lime
 import lime.lime_tabular
 from lime import lime_tabular
-
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction with LIME", layout="wide")
@@ -44,7 +43,7 @@ def get_descriptors(smiles):
 # LIME解释器初始化
 explainer = lime_tabular.LimeTabularExplainer(
     training_data=Xtrain_std,
-    feature_names=Xtrain_std.columns.tolist(),
+    feature_names=descriptor_names,
     class_names=['DIA_negative', 'DIA_positive'],
     mode='classification'
 )
@@ -106,5 +105,5 @@ if st.button("Predict"):
 
             # 使用LIME解释预测结果
             st.subheader("LIME Explanation")
-            exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba)
+            exp = explainer.explain_instance(descriptors_std.flatten(), best_estimator_eec.predict_proba, num_features=10)
             components.html(exp.as_html(), height=800)
