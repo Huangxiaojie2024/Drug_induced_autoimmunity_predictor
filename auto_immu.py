@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import lime
 import lime.lime_tabular
-from lime import lime_tabular
 import streamlit.components.v1 as components
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction with LIME", layout="wide")
 
@@ -110,11 +110,15 @@ if st.button("Predict"):
             np.random.seed(42)  # 设定随机种子
 
             st.subheader("LIME Explanation")
-            # 提取 LIME 生成的 HTML 并手动调整宽度
+            # 提取 LIME 生成的图像
             exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
 
-            exp_html = exp.as_html()
-            # 调整第二个图的宽度
-            exp_html = exp_html.replace('width: 750px;', 'width: 100%;')  # 强制调整所有图为 100% 宽度
+            # 使用 pyplot 显示 LIME 图像
+            fig = exp.as_pyplot_figure()
+            st.pyplot(fig)
 
+            # 如果你仍然想要显示HTML版本（可滚动的表格），可以保留这段
+            st.subheader("LIME Explanation (HTML View)")
+            exp_html = exp.as_html()
+            exp_html = exp_html.replace('width: 750px;', 'width: 100%;')  # 强制调整宽度
             components.html(exp_html, height=1000, scrolling=True)
