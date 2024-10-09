@@ -110,5 +110,11 @@ if st.button("Predict"):
             np.random.seed(42)  # 设定随机种子
 
             st.subheader("LIME Explanation")
+            # 提取 LIME 生成的 HTML 并手动调整宽度
             exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
-            components.html(exp.as_html(), height=1000, width=2000, scrolling=True)
+
+            exp_html = exp.as_html()
+            # 调整第二个图的宽度
+            exp_html = exp_html.replace('width: 750px;', 'width: 100%;')  # 强制调整所有图为 100% 宽度
+
+            components.html(exp_html, height=1000, scrolling=True)
