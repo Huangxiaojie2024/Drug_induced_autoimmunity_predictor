@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import lime
 import lime.lime_tabular
+from lime import lime_tabular
+
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction with LIME", layout="wide")
