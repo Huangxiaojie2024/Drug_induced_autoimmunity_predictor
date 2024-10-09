@@ -101,7 +101,7 @@ if st.button("Predict"):
             explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
 
             # 计算SHAP值
-            shap_values = explainer.shap_values(descriptors_std, nsamples=120)
+            shap_values = explainer.shap_values(descriptors_std, nsamples=150)
 
             # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
             force_plot = shap.force_plot(
