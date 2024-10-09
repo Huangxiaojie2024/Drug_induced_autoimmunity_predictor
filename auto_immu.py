@@ -41,7 +41,7 @@ def get_descriptors(smiles):
 
 # LIME解释器初始化
 explainer = lime.lime_tabular.LimeTabularExplainer(
-    training_data=Xtrain_std
+    training_data=Xtrain_std,
     feature_names=Xtrain_std.columns.tolist(),
     class_names=['DIA_negative', 'DIA_positive'],
     mode='classification'
