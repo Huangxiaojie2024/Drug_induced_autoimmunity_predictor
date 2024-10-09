@@ -92,28 +92,3 @@ if st.button("Predict"):
                     unsafe_allow_html=True
                 )
 
-            # SHAP 解释
-            st.subheader("SHAP Explanation")
-
-            # 创建SHAP解释器
-            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
-
-            # 计算SHAP值
-            shap_values = explainer.shap_values(descriptors_std)
-
-            # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
-            force_plot = shap.force_plot(
-                explainer.expected_value[1], 
-                shap_values[0, :, 1],  # 使用第二个类别的 SHAP 值
-                descriptors,  # 使用原始描述符
-                feature_names=descriptor_names,  # 显示特征名称
-                show=False
-            )
-            html_file = "shap_force_plot.html"
-            shap.save_html(html_file, force_plot)
-
-            # 在 Streamlit 中显示 HTML
-            with open(html_file) as f:
-                components.html(f.read(), height=500, scrolling=True)
-    else:
-        st.error("Please enter a valid SMILES structure.")
