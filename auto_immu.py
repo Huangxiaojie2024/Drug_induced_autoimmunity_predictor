@@ -18,6 +18,9 @@ with open('scaler_and_model.pkl', 'rb') as f:
 with open('Xtrain_std.pkl', 'rb') as f:
     Xtrain_std = pickle.load(f)
 
+# 将Xtrain_std转换为NumPy数组
+Xtrain_std_np = Xtrain_std.values  # 转换为NumPy数组
+
 # 65个分子描述符名称
 descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_VSA4', 'EState_VSA6', 
                     'EState_VSA9', 'HallKierAlpha', 'Ipc', 'Kappa3', 'NHOHCount', 'NumAliphaticHeterocycles',
@@ -42,7 +45,7 @@ def get_descriptors(smiles):
 
 # LIME解释器初始化
 explainer = lime_tabular.LimeTabularExplainer(
-    training_data=Xtrain_std,
+    training_data=Xtrain_std_np,  # 使用NumPy数组
     feature_names=descriptor_names,
     class_names=['DIA_negative', 'DIA_positive'],
     mode='classification'
