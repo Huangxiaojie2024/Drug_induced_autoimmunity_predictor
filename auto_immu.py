@@ -4,17 +4,15 @@ from rdkit.ML.Descriptors import MoleculeDescriptors
 import pickle
 import numpy as np
 import pandas as pd
-import shap
-from lime.lime_tabular import LimeTabularExplainer
+import lime
+import lime.lime_tabular
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction", layout="wide")
+st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction with LIME", layout="wide")
 
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
     scaler, best_estimator_eec = pickle.load(f)
-with open('Xtrain_std.pkl', 'rb') as f:
-    Xtrain_std = pickle.load(f)
 
 # 65个分子描述符名称
 descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_VSA4', 'EState_VSA6', 
@@ -38,8 +36,16 @@ def get_descriptors(smiles):
     descriptors = calculator.CalcDescriptors(mol)
     return np.array(descriptors)
 
+# LIME解释器初始化
+explainer = lime.lime_tabular.LimeTabularExplainer(
+    training_data=np.array([np.zeros(len(descriptor_names))]),  # Placeholder for correct dimensionality
+    feature_names=descriptor_names,
+    class_names=['DIA_negative', 'DIA_positive'],
+    mode='classification'
+)
+
 # Streamlit app
-st.title("Drug-induced Autoimmunity (DIA) Prediction")
+st.title("Drug-induced Autoimmunity (DIA) Prediction with LIME")
 
 # 输入 SMILES 结构
 smiles_input = st.text_input("Enter a drug SMILES structure")
@@ -93,15 +99,7 @@ if st.button("Predict"):
                     unsafe_allow_html=True
                 )
 
-            # LIME 解释
+            # 使用LIME解释预测结果
             st.subheader("LIME Explanation")
-            explainer = LimeTabularExplainer(Xtrain_std, feature_names=descriptor_names, class_names=["DIA_negative", "DIA_positive"], discretize_continuous=True)
-
-            # 生成解释
-            exp = explainer.explain_instance(descriptors_std.flatten(), best_estimator_eec.predict_proba, num_features=10)
-
-            # 显示 LIME 解释
-            st.write(exp.as_list())
-
-            # 显示 LIME 可视化结果
-            components.html(exp.as_html(), height=800, scrolling=True)
+            exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
+            components.html(exp.as_html(), height=800)
