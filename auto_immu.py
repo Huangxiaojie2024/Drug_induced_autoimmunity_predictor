@@ -116,6 +116,7 @@ if st.button("Predict"):
 
             # 使用 pyplot 显示 LIME 图像
             fig = exp.as_pyplot_figure()
+            plt.figure(figsize=(10, 5))
             st.pyplot(fig)
 
             # 如果你仍然想要显示HTML版本（可滚动的表格），可以保留这段
