@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import lime
 import lime.lime_tabular
-from lime import lime_tabular
 import streamlit.components.v1 as components
 import matplotlib.pyplot as plt
 
@@ -114,9 +113,13 @@ if st.button("Predict"):
             # 提取 LIME 生成的图像
             exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
 
-            # 使用 pyplot 显示 LIME 图像
+            # 调整图像大小
             fig = exp.as_pyplot_figure()
-            fig.set_size_inches(10, 5)  # 直接调整 LIME 图像的大小
+
+            # 使用plt.subplots调整固定大小
+            fig.set_size_inches(6, 4)  # 固定调整 LIME 图像的大小为 6x4 英寸
+
+            # 显示调整后的图像
             st.pyplot(fig)
 
             # 如果你仍然想要显示HTML版本（可滚动的表格），可以保留这段
