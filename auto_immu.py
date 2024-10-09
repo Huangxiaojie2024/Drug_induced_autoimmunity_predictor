@@ -111,4 +111,4 @@ if st.button("Predict"):
 
             st.subheader("LIME Explanation")
             exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
-            components.html(exp.as_html(), height=1000,scrolling=True)
+            components.html(exp.as_html(), height=1000, width=1200, scrolling=True)
