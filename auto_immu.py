@@ -4,7 +4,7 @@ from rdkit.ML.Descriptors import MoleculeDescriptors
 import pickle
 import numpy as np
 import pandas as pd
-import lime
+import shap
 from lime.lime_tabular import LimeTabularExplainer
 import streamlit.components.v1 as components
 
@@ -98,12 +98,10 @@ if st.button("Predict"):
             explainer = LimeTabularExplainer(Xtrain_std, feature_names=descriptor_names, class_names=["DIA_negative", "DIA_positive"], discretize_continuous=True)
 
             # 生成解释
-            exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
+            exp = explainer.explain_instance(descriptors_std.flatten(), best_estimator_eec.predict_proba, num_features=10)
 
             # 显示 LIME 解释
             st.write(exp.as_list())
-            
+
             # 显示 LIME 可视化结果
             components.html(exp.as_html(), height=800, scrolling=True)
-    else:
-        st.error("Please enter a valid SMILES structure.")
