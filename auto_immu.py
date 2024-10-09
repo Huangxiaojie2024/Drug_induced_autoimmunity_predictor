@@ -13,6 +13,9 @@ st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction with L
 # 加载模型和标准化器
 with open('scaler_and_model.pkl', 'rb') as f:
     scaler, best_estimator_eec = pickle.load(f)
+# 加载训练数据（如果之前有存储的话）
+with open('Xtrain_std.pkl', 'rb') as f:
+    Xtrain_std = pickle.load(f)
 
 # 65个分子描述符名称
 descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_VSA4', 'EState_VSA6', 
@@ -38,8 +41,8 @@ def get_descriptors(smiles):
 
 # LIME解释器初始化
 explainer = lime.lime_tabular.LimeTabularExplainer(
-    training_data=np.array([np.zeros(len(descriptor_names))]),  # Placeholder for correct dimensionality
-    feature_names=descriptor_names,
+    training_data=Xtrain_std
+    feature_names=Xtrain_std.columns.tolist(),
     class_names=['DIA_negative', 'DIA_positive'],
     mode='classification'
 )
