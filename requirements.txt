@@ -1,6 +1,6 @@
 streamlit
 scikit-learn
-rdkit==2016.03.1
+rdkit==2017.09.3
 numpy
 pandas
 imblearn
