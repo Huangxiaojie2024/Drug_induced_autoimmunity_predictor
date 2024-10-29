@@ -293,9 +293,9 @@ if uploaded_file is not None:
                     )
                     
                     # SHAP瀑布图
-    				st.markdown("### SHAP Waterfall Plot")
+    		        st.markdown("### SHAP Waterfall Plot")
     
-				    # 创建瀑布图
+		            # 创建瀑布图
 				    fig, ax = plt.subplots(figsize=(10, 8))
 				    shap.plots._waterfall.waterfall_legacy(
 				        explainer.expected_value[1], # 基准值
