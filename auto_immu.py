@@ -4,9 +4,8 @@ import numpy as np
 import pandas as pd
 import shap
 import streamlit.components.v1 as components
-import plotly.express as px
-import plotly.graph_objects as go
-from scipy import stats
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # 设置页面配置
 st.set_page_config(
@@ -24,14 +23,9 @@ st.markdown("""
         }
         .stButton>button {
             width: 100%;
-            background-color: #0d6efd;
-            color: white;
             border-radius: 5px;
             padding: 0.5rem;
             margin-bottom: 0.5rem;
-        }
-        .stProgress .st-bo {
-            background-color: #0d6efd;
         }
         .plot-container {
             background-color: white;
@@ -40,17 +34,20 @@ st.markdown("""
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #0d6efd;
+            color: #1f77b4;
             text-align: center;
             padding: 1rem;
         }
         h2 {
-            color: #0d6efd;
+            color: #1f77b4;
             padding: 0.5rem 0;
         }
         .stAlert {
             background-color: #e7f3fe;
-            border-left-color: #0d6efd;
+        }
+        div[data-testid="stMetricValue"] {
+            font-size: 24px;
+            color: #1f77b4;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -138,7 +135,7 @@ if uploaded_file is not None:
                 "Prediction": ["DIA Positive" if p > 0.5 else "DIA Negative" for p in predictions_prob[:, 1]]
             })
             
-            # 创建三列布局用于显示关键指标
+            # 显示关键指标
             col1, col2, col3 = st.columns(3)
             
             with col1:
@@ -156,21 +153,14 @@ if uploaded_file is not None:
                 st.metric("Average DIA Probability", f"{avg_prob:.2f}",
                          f"±{np.std(predictions_prob[:, 1]):.2f} SD")
 
-            # 预测结果可视化
+            # 使用streamlit的原生图表显示概率分布
             st.subheader("📈 Prediction Distribution")
-            fig = go.Figure()
-            fig.add_trace(go.Histogram(x=predictions_prob[:, 1], 
-                                     nbinsx=30,
-                                     name="DIA Probability Distribution",
-                                     marker_color='#0d6efd'))
-            fig.update_layout(
-                title="Distribution of DIA Probabilities",
-                xaxis_title="Probability of DIA",
-                yaxis_title="Number of Compounds",
-                template="plotly_white",
-                showlegend=False
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.histplot(predictions_prob[:, 1], bins=30, color='#1f77b4', ax=ax)
+            ax.set_title("Distribution of DIA Probabilities")
+            ax.set_xlabel("Probability of DIA")
+            ax.set_ylabel("Number of Compounds")
+            st.pyplot(fig)
 
             # 显示详细结果表格
             st.subheader("📋 Detailed Results")
@@ -193,21 +183,23 @@ if uploaded_file is not None:
             
             with col1:
                 st.markdown("### Select Compound")
-                # 创建一个更美观的选择界面
-                compounds_df = pd.DataFrame({
-                    "ID": range(1, len(df) + 1),
-                    "Prediction": ["🔴" if p > 0.5 else "🟢" for p in predictions_prob[:, 1]],
-                    "Probability": [f"{p:.2f}" for p in predictions_prob[:, 1]]
-                })
-                
+                # 优化的选择界面
                 selected_compound = st.selectbox(
                     "Choose a compound to analyze:",
                     range(len(df)),
-                    format_func=lambda x: f"Compound {x+1} {compounds_df.loc[x, 'Prediction']} (P={compounds_df.loc[x, 'Probability']})"
+                    format_func=lambda x: f"Compound {x+1} ({'🔴' if predictions_prob[x,1] > 0.5 else '🟢'}) P={predictions_prob[x,1]:.2f}"
                 )
                 
                 if selected_compound is not None:
                     st.session_state.selected_compound = selected_compound
+                    
+                    # 显示所选化合物的预测详情
+                    st.markdown(f"""
+                        #### Compound Details
+                        - **Prediction**: {'DIA Positive' if predictions_prob[selected_compound,1] > 0.5 else 'DIA Negative'}
+                        - **Probability**: {predictions_prob[selected_compound,1]:.3f}
+                        - **Risk Level**: {'High' if predictions_prob[selected_compound,1] > 0.8 else 'Medium' if predictions_prob[selected_compound,1] > 0.5 else 'Low'}
+                    """)
 
             with col2:
                 if 'selected_compound' in st.session_state:
@@ -232,20 +224,17 @@ if uploaded_file is not None:
                         with open(html_file) as f:
                             components.html(f.read(), height=500, scrolling=True)
                         
-                        # 添加特征重要性条形图
+                        # 显示特征重要性
                         st.markdown("### Top Contributing Features")
                         feature_importance = pd.DataFrame({
                             'Feature': descriptor_names,
                             'Importance': np.abs(shap_values[0][0,:,1])
                         }).sort_values('Importance', ascending=False).head(10)
                         
-                        fig = px.bar(feature_importance, 
-                                   x='Importance', 
-                                   y='Feature',
-                                   orientation='h',
-                                   title='Top 10 Most Influential Molecular Descriptors')
-                        fig.update_layout(template="plotly_white")
-                        st.plotly_chart(fig, use_container_width=True)
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        sns.barplot(data=feature_importance, x='Importance', y='Feature', color='#1f77b4', ax=ax)
+                        ax.set_title('Top 10 Most Influential Molecular Descriptors')
+                        st.pyplot(fig)
                         
                         st.success('Analysis completed successfully!')
 
