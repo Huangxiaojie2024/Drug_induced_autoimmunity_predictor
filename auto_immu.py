@@ -236,7 +236,7 @@ if uploaded_file is not None:
                         st.markdown("### Top Contributing Features")
                         feature_importance = pd.DataFrame({
                             'Feature': descriptor_names,
-                            'Importance': np.abs(shap_values[0][0,:,1])
+                            'Importance': np.abs(shap_values[0,:,1])
                         }).sort_values('Importance', ascending=False).head(10)
                         
                         fig = px.bar(feature_importance, 
