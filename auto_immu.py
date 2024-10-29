@@ -123,7 +123,7 @@ if uploaded_file is not None:
                         # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
                         force_plot = shap.force_plot(
                             explainer.expected_value[1], 
-                            shap_values[compound_index,:,1],  # 使用第二个类别（正类）的SHAP值
+                            shap_values[0,:,1],  # 使用第二个类别（正类）的SHAP值
                             X[compound_index],  # 使用原始描述符
                             feature_names=descriptor_names,  # 显示特征名称
                             show=False
