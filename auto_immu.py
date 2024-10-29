@@ -292,44 +292,23 @@ if uploaded_file is not None:
                         nsamples=150
                     )
                     
-                    # 特征重要性分析
-                    st.markdown("### Top Contributing Features")
-                    feature_importance = pd.DataFrame({
-                        'Feature': descriptor_names,
-                        'Importance': np.abs(shap_values[0,:,1])
-                    }).sort_values('Importance', ascending=True).tail(10)
-                    
-                    fig = px.bar(
-                        feature_importance,
-                        x='Importance',
-                        y='Feature',
-                        orientation='h',
-                        title='Most Influential Molecular Descriptors'
-                    )
-                    fig.update_layout(
-                        yaxis={'categoryorder': 'total ascending'},
-                        height=400,
-                        showlegend=False
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # SHAP力图
-                    st.markdown("### SHAP Force Plot")
-                    force_plot = shap.force_plot(
-                        explainer.expected_value[1],
-                        shap_values[0,:,1],
-                        X[selected_compound],
-                        feature_names=descriptor_names,
-                        show=False
-                    )
-                    
-                    html_file = f"shap_force_plot_{selected_compound}.html"
-                    shap.save_html(html_file, force_plot)
-                    
-                    with open(html_file) as f:
-                        components.html(f.read(), height=300, scrolling=True)
-                    
-                    st.success('Analysis completed successfully!')
+                    # SHAP瀑布图
+    				st.markdown("### SHAP Waterfall Plot")
+    
+				    # 创建瀑布图
+				    fig, ax = plt.subplots(figsize=(10, 8))
+				    shap.plots._waterfall.waterfall_legacy(
+				        explainer.expected_value[1], # 基准值
+				        shap_values[1][0], # 使用正类的SHAP值
+				        X[selected_compound], # 特征值
+				        feature_names=descriptor_names, # 特征名称
+				        show=False
+				    )
+				    plt.title("Impact of Features on Model Prediction")
+				    plt.tight_layout()
+				    st.pyplot(fig)
+				    
+				    st.success('Analysis completed successfully!')
 
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
