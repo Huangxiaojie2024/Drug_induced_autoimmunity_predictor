@@ -9,3 +9,4 @@ IPython
 lime
 plotly
 seaborn
+scipy
