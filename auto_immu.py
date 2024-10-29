@@ -284,7 +284,7 @@ if uploaded_file is not None:
                         best_estimator_eec.predict_proba,
                         Xtrain_std
                     )
-                     np.random.seed(42)
+                    np.random.seed(42)
                     
                     # 计算SHAP值
                     shap_values = explainer.shap_values(
