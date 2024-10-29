@@ -293,22 +293,22 @@ if uploaded_file is not None:
                     )
                     
                     # SHAP瀑布图
-    		        st.markdown("### SHAP Waterfall Plot")
+    		    st.markdown("### SHAP Waterfall Plot")
     
 		            # 创建瀑布图
-				    fig, ax = plt.subplots(figsize=(10, 8))
-				    shap.plots._waterfall.waterfall_legacy(
+		    fig, ax = plt.subplots(figsize=(10, 8))
+		    shap.plots._waterfall.waterfall_legacy(
 				        explainer.expected_value[1], # 基准值
 				        shap_values[0,:,1], # 使用正类的SHAP值
 				        X[selected_compound], # 特征值
 				        feature_names=descriptor_names, # 特征名称
 				        show=False
 				    )
-				    plt.title("Impact of Features on Model Prediction")
-				    plt.tight_layout()
-				    st.pyplot(fig)
+		    plt.title("Impact of Features on Model Prediction")
+		    plt.tight_layout()
+		    st.pyplot(fig)
 				    
-				    st.success('Analysis completed successfully!')
+		    st.success('Analysis completed successfully!')
 
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
