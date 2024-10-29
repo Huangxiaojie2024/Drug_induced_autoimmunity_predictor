@@ -1,27 +1,24 @@
 import streamlit as st
-from rdkit import Chem
-from rdkit.ML.Descriptors import MoleculeDescriptors
 import pickle
 import numpy as np
 import pandas as pd
-import lime
-import lime.lime_tabular
+import shap
 import streamlit.components.v1 as components
-import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction with LIME", layout="wide")
+st.set_page_config(page_title="Drug-induced Autoimmunity (DIA) Prediction", layout="wide")
 
 # 加载模型和标准化器
-with open('scaler_and_model.pkl', 'rb') as f:
-    scaler, best_estimator_eec = pickle.load(f)
-# 加载训练数据（如果之前有存储的话）
-with open('Xtrain_std.pkl', 'rb') as f:
-    Xtrain_std = pickle.load(f)
+@st.cache_resource
+def load_model():
+    with open('scaler_and_model.pkl', 'rb') as f:
+        scaler, best_estimator_eec = pickle.load(f)
+    with open('Xtrain_std.pkl', 'rb') as f:
+        Xtrain_std = pickle.load(f)
+    return scaler, best_estimator_eec, Xtrain_std
 
-# 将Xtrain_std转换为NumPy数组
-Xtrain_std_np = Xtrain_std.values  # 转换为NumPy数组
+scaler, best_estimator_eec, Xtrain_std = load_model()
 
-# 65个分子描述符名称
+# 65个最佳分子描述符名称
 descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_VSA4', 'EState_VSA6', 
                     'EState_VSA9', 'HallKierAlpha', 'Ipc', 'Kappa3', 'NHOHCount', 'NumAliphaticHeterocycles',
                     'NumAliphaticRings', 'NumAromaticCarbocycles', 'NumAromaticRings', 'PEOE_VSA10',
@@ -34,96 +31,90 @@ descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_V
                     'fr_methoxy', 'fr_morpholine', 'fr_nitro_arom', 'fr_para_hydroxylation', 'fr_phos_ester', 'fr_piperdine', 
                     'fr_pyridine', 'fr_sulfide', 'fr_term_acetylene', 'fr_unbrch_alkane']
 
-# 提取分子描述符的函数
-def get_descriptors(smiles):
-    mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
-        return None
-    calculator = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
-    descriptors = calculator.CalcDescriptors(mol)
-    return np.array(descriptors)
-
-# LIME解释器初始化
-explainer = lime_tabular.LimeTabularExplainer(
-    training_data=Xtrain_std_np,  # 使用NumPy数组
-    feature_names=descriptor_names,
-    class_names=['DIA_negative', 'DIA_positive'],
-    mode='classification'
-)
-
 # Streamlit app
-st.title("Drug-induced Autoimmunity (DIA) Prediction with LIME")
+st.title("Drug-induced Autoimmunity (DIA) Prediction")
 
-# 输入 SMILES 结构
-smiles_input = st.text_input("Enter a drug SMILES structure")
+# 文件上传
+uploaded_file = st.sidebar.file_uploader("Upload ChemDes descriptors CSV file", type=['csv'])
 
-if st.button("Predict"):
-    if smiles_input:
-        descriptors = get_descriptors(smiles_input)
+if uploaded_file is not None:
+    # 读取CSV文件
+    try:
+        df = pd.read_csv(uploaded_file)
+        st.sidebar.success(f"Successfully loaded file with {len(df)} compounds")
         
-        if descriptors is None:
-            st.error("Invalid SMILES structure")
+        # 检查是否包含所需的描述符
+        missing_descriptors = [desc for desc in descriptor_names if desc not in df.columns]
+        if missing_descriptors:
+            st.error(f"Missing required descriptors: {', '.join(missing_descriptors)}")
         else:
+            # 提取65个最佳描述符
+            X = df[descriptor_names].values
+            
             # 显示原始描述符
-            st.subheader("Original Descriptors (before scaling)")
-            descriptors_df = pd.DataFrame([descriptors], columns=descriptor_names)
-            st.write(descriptors_df)
+            with st.expander("Show Original Descriptors"):
+                st.dataframe(pd.DataFrame(X, columns=descriptor_names))
 
-            # 将描述符标准化
-            descriptors_std = scaler.transform([descriptors])
-
+            # 标准化描述符
+            X_std = scaler.transform(X)
+            
             # 显示标准化后的描述符
-            st.subheader("Scaled Descriptors (after scaling)")
-            descriptors_std_df = pd.DataFrame(descriptors_std, columns=descriptor_names)
-            st.write(descriptors_std_df)
+            with st.expander("Show Scaled Descriptors"):
+                st.dataframe(pd.DataFrame(X_std, columns=descriptor_names))
 
-            # 使用模型进行预测并获取概率值
-            prediction_prob = best_estimator_eec.predict_proba(descriptors_std)[0]
-
-            # 显示预测的概率值
-            st.subheader("Prediction Probabilities")
-            prob_df = pd.DataFrame({
-                "Class 0 (DIA_negative)": prediction_prob[0],
-                "Class 1 (DIA_positive)": prediction_prob[1]
-            }, index=[0])
-            st.write(prob_df)
-
-            # 最终预测结果
-            if prediction_prob[1] > prediction_prob[0]:
-                st.markdown(
-                    f"<div style='background-color: lightgreen; border: 2px solid green; padding: 10px; border-radius: 5px;'>"
-                    f"<h3 style='font-size: 30px;'>The drug is predicted to be associated with autoimmune disease.</h3>"
-                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[1]:.2f}</span>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f"<div style='background-color: lightgreen; border: 2px solid green; padding: 10px; border-radius: 5px;'>"
-                    f"<h3 style='font-size: 30px;'>The drug is predicted NOT to be associated with autoimmune disease.</h3>"
-                    f"<span style='color:red; font-size: 20px;'>Probability: {prediction_prob[0]:.2f}</span>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
-
-            # 使用LIME解释预测结果
-            np.random.seed(42)  # 设定随机种子
-
-            st.subheader("LIME Explanation")
-            # 提取 LIME 生成的图像
-            exp = explainer.explain_instance(descriptors_std[0], best_estimator_eec.predict_proba, num_features=10)
-
-            # 调整图像大小
-            fig = exp.as_pyplot_figure()
-
-            # 使用plt.subplots调整固定大小
-            fig.set_size_inches(6, 4)  # 固定调整 LIME 图像的大小为 6x4 英寸
-
-            # 显示调整后的图像
-            st.pyplot(fig)
-
-            # 如果你仍然想要显示HTML版本（可滚动的表格），可以保留这段
-            st.subheader("LIME Explanation (HTML View)")
-            exp_html = exp.as_html()
-            exp_html = exp_html.replace('width: 750px;', 'width: 100%;')  # 强制调整宽度
-            components.html(exp_html, height=1000, scrolling=True)
+            # 批量预测
+            predictions_prob = best_estimator_eec.predict_proba(X_std)
+            
+            # 创建结果DataFrame
+            results_df = pd.DataFrame({
+                "Compound_ID": range(1, len(df) + 1),
+                "DIA_negative_prob": predictions_prob[:, 0],
+                "DIA_positive_prob": predictions_prob[:, 1],
+                "Prediction": ["DIA Positive" if p > 0.5 else "DIA Negative" for p in predictions_prob[:, 1]]
+            })
+            
+            # 显示预测结果
+            st.subheader("Prediction Results")
+            st.dataframe(results_df)
+            
+            # 下载预测结果
+            csv = results_df.to_csv(index=False)
+            st.download_button(
+                label="Download Prediction Results",
+                data=csv,
+                file_name="dia_predictions.csv",
+                mime="text/csv"
+            )
+            
+            # SHAP值分析
+            st.subheader("SHAP Analysis")
+            compound_index = st.selectbox(
+                "Select a compound to view SHAP explanation",
+                range(len(df))
+            )
+            
+            # 创建SHAP解释器
+            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
+            
+            # 计算选定化合物的SHAP值
+            shap_values = explainer.shap_values(X_std[compound_index:compound_index+1], nsamples=150)
+            
+            # 显示SHAP力图
+            force_plot = shap.force_plot(
+                explainer.expected_value[1],
+                shap_values[0][0, :, 1],
+                X[compound_index],
+                feature_names=descriptor_names,
+                show=False
+            )
+            
+            html_file = f"shap_force_plot_{compound_index}.html"
+            shap.save_html(html_file, force_plot)
+            
+            with open(html_file) as f:
+                components.html(f.read(), height=500, scrolling=True)
+            
+    except Exception as e:
+        st.error(f"Error processing file: {str(e)}")
+else:
+    st.info("Please upload a CSV file containing molecular descriptors from ChemDes.")
