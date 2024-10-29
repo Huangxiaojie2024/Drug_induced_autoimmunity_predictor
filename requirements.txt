@@ -7,3 +7,5 @@ imblearn
 shap
 IPython
 lime
+plotly
+seaborn
