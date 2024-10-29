@@ -118,12 +118,19 @@ if uploaded_file is not None:
                     explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
                     
                     # 计算选定化合物的SHAP值
-                    shap_values = explainer.shap_values(X_std[compound_index:compound_index+1], nsamples=150)
+                    with st.spinner('Calculating SHAP values...'):
+                        shap_values = explainer.shap_values(X_std[compound_index:compound_index+1], nsamples=150)
+                        
+                        # 修复维度问题：如果shap_values是列表，取第二个类别（正类）的SHAP值
+                        if isinstance(shap_values, list):
+                            shap_values_display = shap_values[1]
+                        else:
+                            shap_values_display = shap_values
                     
                     # 显示SHAP力图
                     force_plot = shap.force_plot(
-                        explainer.expected_value[1],
-                        shap_values[0][0, :, 1],
+                        explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value,
+                        shap_values_display[0],  # 只取第一个样本的SHAP值
                         X[compound_index],
                         feature_names=descriptor_names,
                         show=False
@@ -134,10 +141,14 @@ if uploaded_file is not None:
                     
                     with open(html_file) as f:
                         components.html(f.read(), height=500, scrolling=True)
+                    
+                    # 添加进度提示
+                    st.success('SHAP analysis completed!')
                 else:
                     st.info("Please select a compound to view its SHAP explanation.")
             
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
+        st.error("Stack trace:", exc_info=True)  # 添加详细错误信息
 else:
     st.info("Please upload a CSV file containing molecular descriptors from ChemDes.")
