@@ -298,7 +298,7 @@ if uploaded_file is not None:
                     
                     # SHAP瀑布图
                     st.markdown("### SHAP Waterfall Plot")
-                    
+                    col1, col2, col3 = st.columns([1,6,1])  # 使用比例1:6:1来控制中间列的宽度
                     # 创建瀑布图
                     fig, ax = plt.subplots(figsize=(6, 4))
                     shap.plots._waterfall.waterfall_legacy(
