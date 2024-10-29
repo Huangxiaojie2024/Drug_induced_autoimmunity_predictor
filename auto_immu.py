@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 import pickle
 import numpy as np
@@ -6,6 +7,7 @@ import shap
 import streamlit.components.v1 as components
 import plotly.express as px
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 
 # 设置页面配置
 st.set_page_config(
@@ -95,7 +97,8 @@ descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_V
                     'fr_ether', 'fr_furan', 'fr_guanido', 'fr_hdrzone', 'fr_imide', 'fr_ketone_Topliss', 'fr_lactam', 
                     'fr_methoxy', 'fr_morpholine', 'fr_nitro_arom', 'fr_para_hydroxylation', 'fr_phos_ester', 'fr_piperdine', 
                     'fr_pyridine', 'fr_sulfide', 'fr_term_acetylene', 'fr_unbrch_alkane']
-
+```
+```python
 # 页面标题和介绍
 st.title("🔬 Drug-induced Autoimmunity (DIA) Predictor")
 st.markdown("""
@@ -106,6 +109,7 @@ st.markdown("""
         </p>
     </div>
 """, unsafe_allow_html=True)
+
 # 侧边栏设计
 with st.sidebar:
     st.header("📊 Data Input")
@@ -279,36 +283,39 @@ if uploaded_file is not None:
                 
                 # SHAP Analysis
                 with st.spinner('Analyzing molecular features...'):
-                    # 创建SHAP解释器
+        
+                    
                     explainer = shap.KernelExplainer(
                         best_estimator_eec.predict_proba,
                         Xtrain_std
                     )
+                    
+                    # 设置随机种子
                     np.random.seed(42)
                     
                     # 计算SHAP值
                     shap_values = explainer.shap_values(
                         X_std[selected_compound:selected_compound+1],
-                        nsamples=150
+                        nsamples=150  # 增加样本数以提高稳定性
                     )
                     
                     # SHAP瀑布图
-    		    st.markdown("### SHAP Waterfall Plot")
-    
-		            # 创建瀑布图
-		    fig, ax = plt.subplots(figsize=(10, 8))
-		    shap.plots._waterfall.waterfall_legacy(
-				        explainer.expected_value[1], # 基准值
-				        shap_values[0,:,1], # 使用正类的SHAP值
-				        X[selected_compound], # 特征值
-				        feature_names=descriptor_names, # 特征名称
-				        show=False
-				    )
-		    plt.title("Impact of Features on Model Prediction")
-		    plt.tight_layout()
-		    st.pyplot(fig)
-				    
-		    st.success('Analysis completed successfully!')
+                    st.markdown("### SHAP Waterfall Plot")
+                    
+                    # 创建瀑布图
+                    fig, ax = plt.subplots(figsize=(12, 8))
+                    shap.plots._waterfall.waterfall_legacy(
+                        explainer.expected_value[1], # 基准值
+                        shap_values[0,:,1], # 使用正类的SHAP值
+                        X[selected_compound], # 特征值
+                        feature_names=descriptor_names, # 特征名称
+                        show=False
+                    )
+                    plt.title("Impact of Features on Model Prediction")
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    
+                    st.success('Analysis completed successfully!')
 
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
@@ -330,3 +337,4 @@ else:
         - Risk level assessment
         - Detailed feature importance analysis
     """)
+```
