@@ -88,31 +88,54 @@ if uploaded_file is not None:
             
             # SHAP值分析
             st.subheader("SHAP Analysis")
-            compound_index = st.selectbox(
-                "Select a compound to view SHAP explanation",
-                range(len(df))
-            )
             
-            # 创建SHAP解释器
-            explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
+            # 创建列布局
+            col1, col2 = st.columns([1, 3])
             
-            # 计算选定化合物的SHAP值
-            shap_values = explainer.shap_values(X_std[compound_index:compound_index+1], nsamples=150)
-            
-            # 显示SHAP力图
-            force_plot = shap.force_plot(
-                explainer.expected_value[1],
-                shap_values[0][0, :, 1],
-                X[compound_index],
-                feature_names=descriptor_names,
-                show=False
-            )
-            
-            html_file = f"shap_force_plot_{compound_index}.html"
-            shap.save_html(html_file, force_plot)
-            
-            with open(html_file) as f:
-                components.html(f.read(), height=500, scrolling=True)
+            with col1:
+                st.write("Select a compound:")
+                # 为每个化合物创建按钮
+                for i in range(len(df)):
+                    compound_status = f"DIA {'Positive' if predictions_prob[i, 1] > 0.5 else 'Negative'}"
+                    button_color = 'red' if predictions_prob[i, 1] > 0.5 else 'green'
+                    if st.button(
+                        f"Compound {i+1}\n({compound_status})",
+                        key=f"compound_{i}",
+                        help=f"Probability of DIA: {predictions_prob[i, 1]:.3f}"
+                    ):
+                        st.session_state.selected_compound = i
+
+            with col2:
+                if 'selected_compound' in st.session_state:
+                    compound_index = st.session_state.selected_compound
+                    
+                    # 显示选中化合物的详细信息
+                    st.write(f"### Compound {compound_index + 1} Details")
+                    st.write(f"DIA Prediction: {'Positive' if predictions_prob[compound_index, 1] > 0.5 else 'Negative'}")
+                    st.write(f"Probability of DIA: {predictions_prob[compound_index, 1]:.3f}")
+                    
+                    # 创建SHAP解释器
+                    explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
+                    
+                    # 计算选定化合物的SHAP值
+                    shap_values = explainer.shap_values(X_std[compound_index:compound_index+1], nsamples=150)
+                    
+                    # 显示SHAP力图
+                    force_plot = shap.force_plot(
+                        explainer.expected_value[1],
+                        shap_values[0][0, :, 1],
+                        X[compound_index],
+                        feature_names=descriptor_names,
+                        show=False
+                    )
+                    
+                    html_file = f"shap_force_plot_{compound_index}.html"
+                    shap.save_html(html_file, force_plot)
+                    
+                    with open(html_file) as f:
+                        components.html(f.read(), height=500, scrolling=True)
+                else:
+                    st.info("Please select a compound to view its SHAP explanation.")
             
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
