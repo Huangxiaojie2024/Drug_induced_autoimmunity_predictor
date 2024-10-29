@@ -114,56 +114,29 @@ if uploaded_file is not None:
                     st.write(f"Probability of DIA: {predictions_prob[compound_index, 1]:.3f}")
                     
                     # 创建SHAP解释器
-                    try:
-                        with st.spinner('Calculating SHAP values...'):
-                            # 创建解释器
-                            explainer = shap.KernelExplainer(
-                                best_estimator_eec.predict_proba, 
-                                shap.sample(Xtrain_std, 100)  # 使用样本数据加快计算
-                            )
-                            
-                            # 计算SHAP值
-                            shap_values = explainer.shap_values(
-                                X_std[compound_index:compound_index+1],
-                                nsamples=100  # 减少样本数以加快计算
-                            )
-                            
-                            # 准备数据用于force plot
-                            if isinstance(shap_values, list):
-                                # 对于二分类问题，我们使用正类的SHAP值
-                                base_value = explainer.expected_value[1]
-                                shap_values_display = shap_values[1][0]
-                            else:
-                                base_value = explainer.expected_value
-                                shap_values_display = shap_values[0]
-
-                            # 创建SHAP force plot
-                            plt = shap.plots.force(
-                                base_value, 
-                                shap_values_display,
-                                X[compound_index],
-                                feature_names=descriptor_names,
-                                matplotlib=False,
-                                show=False
-                            )
-                            
-                            # 将plot转换为HTML并显示
-                            shap_html = f"<head>{shap.getjs()}</head><body>{plt.html()}</body>"
-                            components.html(shap_html, height=500, scrolling=True)
-                            
-                            # 计算并显示特征重要性排名
-                            st.write("### Top 10 Most Important Features")
-                            feature_importance = pd.DataFrame({
-                                'Feature': descriptor_names,
-                                'Importance': np.abs(shap_values_display)
-                            })
-                            feature_importance = feature_importance.sort_values('Importance', ascending=False).head(10)
-                            st.bar_chart(feature_importance.set_index('Feature'))
-                            
-                        st.success('SHAP analysis completed!')
+                    explainer = shap.KernelExplainer(best_estimator_eec.predict_proba, Xtrain_std)
+                    
+                    # 计算SHAP值
+                    with st.spinner('Calculating SHAP values...'):
+                        shap_values = explainer.shap_values(X_std[compound_index:compound_index+1], nsamples=150)
                         
-                    except Exception as e:
-                        st.error(f"Error in SHAP calculation: {str(e)}")
+                        # 保存 SHAP 力图为 HTML 文件，显示特征名称和原始数值
+                        force_plot = shap.force_plot(
+                            explainer.expected_value[1], 
+                            shap_values[1][0],  # 使用第二个类别（正类）的SHAP值
+                            X[compound_index],  # 使用原始描述符
+                            feature_names=descriptor_names,  # 显示特征名称
+                            show=False
+                        )
+                        
+                        html_file = f"shap_force_plot_{compound_index}.html"
+                        shap.save_html(html_file, force_plot)
+                        
+                        # 在 Streamlit 中显示 HTML
+                        with open(html_file) as f:
+                            components.html(f.read(), height=500, scrolling=True)
+                        
+                        st.success('SHAP analysis completed!')
                 else:
                     st.info("Please select a compound to view its SHAP explanation.")
             
