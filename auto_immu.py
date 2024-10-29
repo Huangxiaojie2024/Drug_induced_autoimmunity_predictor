@@ -288,7 +288,7 @@ if uploaded_file is not None:
                     )
                     
                     # 设置随机种子
-                    np.random.seed(42)
+                    np.random.seed(1)
                     
                     # 计算SHAP值
                     shap_values = explainer.shap_values(
