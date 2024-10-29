@@ -306,7 +306,7 @@ if uploaded_file is not None:
                         shap_values[0,:,1], # 使用正类的SHAP值
                         X[selected_compound], # 特征值
                         feature_names=descriptor_names, # 特征名称
-                        show_values=True
+                        show=True
                     )
                     plt.title("Impact of Features on Model Prediction")
                     plt.tight_layout()
