@@ -10,3 +10,4 @@ lime
 plotly
 seaborn
 scipy
+matplotlib
