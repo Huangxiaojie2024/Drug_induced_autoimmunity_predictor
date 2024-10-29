@@ -300,7 +300,7 @@ if uploaded_file is not None:
                     st.markdown("### SHAP Waterfall Plot")
                     
                     # 创建瀑布图
-                    fig, ax = plt.subplots(figsize=(12, 8))
+                    fig, ax = plt.subplots(figsize=(6, 4))
                     shap.plots._waterfall.waterfall_legacy(
                         explainer.expected_value[1], # 基准值
                         shap_values[0,:,1], # 使用正类的SHAP值
