@@ -299,12 +299,17 @@ if uploaded_file is not None:
                     # SHAP瀑布图
                     st.markdown("### SHAP Waterfall Plot")
                     col1, col2, col3 = st.columns([1,6,1])  # 使用比例1:6:1来控制中间列的宽度
+
+                   # 逆标准化当前样本
+                    sample_original = scaler.inverse_transform(X_std[selected_compound:selected_compound+1])
+
+                    
                     # 创建瀑布图
                     fig, ax = plt.subplots(figsize=(6, 4))
                     shap.plots._waterfall.waterfall_legacy(
                         explainer.expected_value[1], # 基准值
                         shap_values[0,:,1], # 使用正类的SHAP值
-                        X[selected_compound], # 特征值
+                        sample_original[0], # 特征值
                         feature_names=descriptor_names, # 特征名称
                         show=True
                     )
