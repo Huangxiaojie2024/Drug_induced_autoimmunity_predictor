@@ -272,11 +272,10 @@ if uploaded_file is not None:
                         results_df.iloc[selected_compound]['Risk_Level']
                     )
                 with col3:
-                    confidence = abs(predictions_prob[selected_compound,1] - 0.5) * 2
                     st.metric(
-                        "Prediction Confidence",
-                        f"{confidence:.1%}"
-                    )
+                        "Prediction Probability",
+                         f"{predictions_prob[selected_compound,1]*100:.2f}%"
+                         )
                 
                 # SHAP Analysis
                 with st.spinner('Analyzing molecular features...'):
