@@ -96,6 +96,7 @@ descriptor_names = ['BalabanJ', 'Chi0', 'EState_VSA1', 'EState_VSA10', 'EState_V
                     'fr_ether', 'fr_furan', 'fr_guanido', 'fr_hdrzone', 'fr_imide', 'fr_ketone_Topliss', 'fr_lactam', 
                     'fr_methoxy', 'fr_morpholine', 'fr_nitro_arom', 'fr_para_hydroxylation', 'fr_phos_ester', 'fr_piperdine', 
                     'fr_pyridine', 'fr_sulfide', 'fr_term_acetylene', 'fr_unbrch_alkane']
+
 # 页面标题和介绍
 st.title("🔬 Drug-induced Autoimmunity (DIA) Predictor")
 st.markdown("""
@@ -106,7 +107,6 @@ st.markdown("""
         </p>
     </div>
 """, unsafe_allow_html=True)
-
 # 侧边栏设计
 with st.sidebar:
     st.header("📊 Data Input")
@@ -280,15 +280,13 @@ if uploaded_file is not None:
                 
                 # SHAP Analysis
                 with st.spinner('Analyzing molecular features...'):
-        
-                    
                     explainer = shap.KernelExplainer(
                         best_estimator_eec.predict_proba,
                         Xtrain_std
                     )
                     
                     # 设置随机种子
-                    np.random.seed(1)
+                    np.random.seed(42)
                     
                     # 计算SHAP值
                     shap_values = explainer.shap_values(
@@ -298,24 +296,27 @@ if uploaded_file is not None:
                     
                     # SHAP瀑布图
                     st.markdown("### SHAP Waterfall Plot")
-                    col1, col2, col3 = st.columns([1,6,1])  # 使用比例1:6:1来控制中间列的宽度
-
-                   # 逆标准化当前样本
-                    sample_original = scaler.inverse_transform(X_std[selected_compound:selected_compound+1])
-
+                    col1, col2, col3 = st.columns([1,6,1])
                     
-                    # 创建瀑布图
-                    fig, ax = plt.subplots(figsize=(6, 4))
-                    shap.plots._waterfall.waterfall_legacy(
-                        explainer.expected_value[1], # 基准值
-                        shap_values[0,:,1], # 使用正类的SHAP值
-                        sample_original[0], # 特征值
-                        feature_names=descriptor_names, # 特征名称
-                        show=True
-                    )
-                    plt.title("Impact of Features on Model Prediction")
-                    plt.tight_layout()
-                    st.pyplot(fig)
+                    with col2:
+                        # 逆标准化当前样本
+                        sample_original = scaler.inverse_transform(X_std[selected_compound:selected_compound+1])
+                        
+                        # 创建瀑布图
+                        fig, ax = plt.subplots(figsize=(8, 6))
+                        shap.waterfall_plot(
+                            shap.Explanation(
+                                values=shap_values[0,:,1],  # 使用正类的SHAP值
+                                base_values=explainer.expected_value[1],  # 模型基值
+                                data=sample_original[0],  # 逆标准化后的特征值
+                                feature_names=descriptor_names  # 特征名称
+                            ),
+                            show=False,
+                            max_display=10  # 显示前15个最重要的特征
+                        )
+                        plt.title("Impact of Features on Model Prediction")
+                        plt.tight_layout()
+                        st.pyplot(fig, use_container_width=True)
                     
                     st.success('Analysis completed successfully!')
 
