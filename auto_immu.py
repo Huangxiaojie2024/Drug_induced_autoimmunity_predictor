@@ -268,14 +268,15 @@ if uploaded_file is not None:
                     )
                 with col2:
                     st.metric(
-                        "Risk Level",
-                        results_df.iloc[selected_compound]['Risk_Level']
-                    )
-                with col3:
-                    st.metric(
                         "Prediction Probability",
                          f"{predictions_prob[selected_compound,1]*100:.2f}%"
                          )
+                with col3:
+                    st.metric(
+                        "Risk Level",
+                        results_df.iloc[selected_compound]['Risk_Level']
+                    )
+               
                 
                 # SHAP Analysis
                 with st.spinner('Analyzing molecular features...'):
