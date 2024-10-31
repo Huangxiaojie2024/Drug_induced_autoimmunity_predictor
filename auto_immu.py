@@ -103,7 +103,7 @@ st.markdown("""
     <div style='background-color: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
         <p style='font-size: 1.1em; color: #666;'>
             Welcome to the DIA Predictor, an advanced machine learning-based tool for predicting drug-induced autoimmunity. 
-            This tool analyzes molecular descriptors to assess the potential risk of drugs causing autoimmune responses.
+            This tool utilizes molecular descriptors to assess the potential risk of drugs causing autoimmune disease.
         </p>
     </div>
 """, unsafe_allow_html=True)
@@ -330,13 +330,11 @@ else:
     st.markdown("""
         ### 📝 Data Requirements
         1. Calculate RDKit descriptors from http://www.scbdd.com/rdk_desc/index/
-        2. Your CSV file should contain all 196 RDKit molecular descriptors
+        2. The CSV file containing RDKit molecular descriptors can be directly uploaded
         3. The model will automatically select the 65 optimal descriptors
         
         ### 🎯 Key Features
         - Advanced Easy Ensemble Classifier for DIA prediction
-        - Comprehensive molecular descriptor analysis
         - Interactive SHAP explanations
         - Risk level assessment
-        - Detailed feature importance analysis
     """)
