@@ -1,13 +1,13 @@
-streamlit
-scikit-learn
-rdkit
-numpy
-pandas
-imblearn
-shap
-IPython
-lime
-plotly
-seaborn
-scipy
-matplotlib
+streamlit # 需要安装，建议版本 1.27.0
+scikit-learn==1.5.1
+rdkit==2022.9.5
+numpy==1.23.5
+pandas==2.2.3
+imblearn==0.0 
+shap==0.46.0
+IPython # 您已安装的版本 8.15.0
+lime==0.2.0.1
+plotly==5.24.1
+seaborn==0.13.2
+scipy==1.11.2
+matplotlib==3.9.2
