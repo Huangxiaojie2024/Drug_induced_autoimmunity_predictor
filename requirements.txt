@@ -1,4 +1,4 @@
-streamlit # 需要安装，建议版本 1.27.0
+streamlit==1.27.0
 scikit-learn==1.5.1
 numpy==1.23.5
 pandas==2.2.3
