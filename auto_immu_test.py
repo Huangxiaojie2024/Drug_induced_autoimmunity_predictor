@@ -81,6 +81,7 @@ def load_model():
     scaler = joblib.load('scaler.pkl')
     # 加载Xtrain_std
     Xtrain_std = joblib.load('Xtrain_std.pkl')
+    model_eec = joblib.load('eec_model.pkl')
     return scaler, model_eec, Xtrain_std
 
 scaler, model_eec, Xtrain_std = load_model()
