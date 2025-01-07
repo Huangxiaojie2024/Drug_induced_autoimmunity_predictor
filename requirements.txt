@@ -1,6 +1,5 @@
 streamlit # 需要安装，建议版本 1.27.0
 scikit-learn==1.5.1
-rdkit==2022.9.5
 numpy==1.23.5
 pandas==2.2.3
 imblearn==0.0 
